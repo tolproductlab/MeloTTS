@@ -1,7 +1,15 @@
-from . import french, english, spanish
-from . import cleaned_text_to_sequence
-import copy
-
+try:
+    from . import french
+except ImportError:
+    french = None
+try:
+    from . import english
+except ImportError:
+    english = None
+try:
+    from . import spanish
+except ImportError:
+    spanish = None
 try:
     from . import chinese
 except ImportError:
@@ -18,6 +26,9 @@ try:
     from . import korean
 except ImportError:
     korean = None
+
+from . import cleaned_text_to_sequence
+import copy
 
 language_module_map = {"ZH": chinese, "JP": japanese, "EN": english, 'ZH_MIX_EN': chinese_mix, 'KR': korean,
                     'FR': french, 'SP': spanish, 'ES': spanish}
