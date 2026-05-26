@@ -1,7 +1,6 @@
 import re
 from . import symbols
 from transformers import AutoTokenizer
-from phonemizer import phonemize
 from phonemizer.backend import EspeakBackend
 
 def distribute_phone(n_phone, n_word):
@@ -13,7 +12,7 @@ def distribute_phone(n_phone, n_word):
     return phones_per_word
 
 def text_normalize(text):
-    # Nettoyage basique sans dépendance fr_phonemizer
+    # Simple normalization
     text = text.lower()
     text = re.sub(r'[《》【】「」『』〔〕]', '', text)
     text = re.sub(r'["""""]+', '"', text)
@@ -22,6 +21,7 @@ def text_normalize(text):
 
 model_id = 'dbmdz/bert-base-french-europeana-cased'
 tokenizer = AutoTokenizer.from_pretrained(model_id)
+backend = EspeakBackend('fr-fr', preserve_punctuation=True, with_stress=False)
 
 def g2p(text, pad_start_end=True, tokenized=None):
     if tokenized is None:
@@ -45,14 +45,7 @@ def g2p(text, pad_start_end=True, tokenized=None):
         if w == '[UNK]':
             phone_list = ['UNK']
         else:
-            phonemes = phonemize(
-                w,
-                language='fr-fr',
-                backend='espeak',
-                strip=True,
-                preserve_punctuation=False,
-                with_stress=False
-            )
+            phonemes = backend.phonemize([w], strip=True)[0]
             phone_list = list(filter(lambda p: p.strip() != "", list(phonemes)))
             if not phone_list:
                 phone_list = ['_']
