@@ -1,8 +1,14 @@
 import torch
 import os
 from . import utils
-from cached_path import cached_path
-from huggingface_hub import hf_hub_download
+try:
+    from cached_path import cached_path
+except ImportError:
+    cached_path = None
+try:
+    from huggingface_hub import hf_hub_download
+except ImportError:
+    hf_hub_download = None
 
 DOWNLOAD_CKPT_URLS = {
     'EN': 'https://myshell-public-repo-host.s3.amazonaws.com/openvoice/basespeakers/EN/checkpoint.pth',
@@ -45,9 +51,13 @@ def load_or_download_config(locale, use_hf=True, config_path=None):
     if config_path is None:
         language = locale.split('-')[0].upper()
         if use_hf:
+            if hf_hub_download is None:
+                raise ImportError("huggingface_hub is required for downloading models from Hugging Face.")
             assert language in LANG_TO_HF_REPO_ID
             config_path = hf_hub_download(repo_id=LANG_TO_HF_REPO_ID[language], filename="config.json")
         else:
+            if cached_path is None:
+                raise ImportError("cached_path is required for downloading models from S3.")
             assert language in DOWNLOAD_CONFIG_URLS
             config_path = cached_path(DOWNLOAD_CONFIG_URLS[language])
     return utils.get_hparams_from_file(config_path)
@@ -56,12 +66,18 @@ def load_or_download_model(locale, device, use_hf=True, ckpt_path=None):
     if ckpt_path is None:
         language = locale.split('-')[0].upper()
         if use_hf:
+            if hf_hub_download is None:
+                raise ImportError("huggingface_hub is required for downloading models from Hugging Face.")
             assert language in LANG_TO_HF_REPO_ID
             ckpt_path = hf_hub_download(repo_id=LANG_TO_HF_REPO_ID[language], filename="checkpoint.pth")
         else:
+            if cached_path is None:
+                raise ImportError("cached_path is required for downloading models from S3.")
             assert language in DOWNLOAD_CKPT_URLS
             ckpt_path = cached_path(DOWNLOAD_CKPT_URLS[language])
     return torch.load(ckpt_path, map_location=device)
 
 def load_pretrain_model():
+    if cached_path is None:
+        raise ImportError("cached_path is required for downloading models from S3.")
     return [cached_path(url) for url in PRETRAINED_MODELS.values()]
