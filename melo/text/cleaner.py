@@ -1,7 +1,13 @@
-from . import french
 from . import english
-from . import spanish
 
+try:
+    from . import french
+except ImportError:
+    french = None
+try:
+    from . import spanish
+except ImportError:
+    spanish = None
 try:
     from . import chinese
 except ImportError:
@@ -29,7 +35,12 @@ language_module_map = {"ZH": chinese, "JP": japanese, "EN": english, 'ZH_MIX_EN'
 def clean_text(text, language):
     language_module = language_module_map[language]
     if language_module is None:
-        raise ImportError(f"Language {language} is not supported because its dependencies are missing.")
+        if language == 'FR':
+            raise ImportError("French dependencies are missing. Please install 'phonemizer' and 'espeak'.")
+        elif language in ['ES', 'SP']:
+            raise ImportError("Spanish dependencies are missing. Please install 'gruut'.")
+        else:
+            raise ImportError(f"Language {language} is not supported because its dependencies are missing.")
     norm_text = language_module.text_normalize(text)
     phones, tones, word2ph = language_module.g2p(norm_text)
     return norm_text, phones, tones, word2ph
@@ -38,7 +49,12 @@ def clean_text(text, language):
 def clean_text_bert(text, language, device=None):
     language_module = language_module_map[language]
     if language_module is None:
-        raise ImportError(f"Language {language} is not supported because its dependencies are missing.")
+        if language == 'FR':
+            raise ImportError("French dependencies are missing. Please install 'phonemizer' and 'espeak'.")
+        elif language in ['ES', 'SP']:
+            raise ImportError("Spanish dependencies are missing. Please install 'gruut'.")
+        else:
+            raise ImportError(f"Language {language} is not supported because its dependencies are missing.")
     norm_text = language_module.text_normalize(text)
     phones, tones, word2ph = language_module.g2p(norm_text)
     
