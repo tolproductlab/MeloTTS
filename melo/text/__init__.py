@@ -21,15 +21,29 @@ def cleaned_text_to_sequence(cleaned_text, tones, language, symbol_to_id=None):
 
 
 def get_bert(norm_text, word2ph, language, device):
-    from .chinese_bert import get_bert_feature as zh_bert
-    from .english_bert import get_bert_feature as en_bert
-    from .japanese_bert import get_bert_feature as jp_bert
-    from .chinese_mix import get_bert_feature as zh_mix_en_bert
-    from .spanish_bert import get_bert_feature as sp_bert
-    from .french_bert import get_bert_feature as fr_bert
-    from .korean import get_bert_feature as kr_bert
+    if language == "ZH":
+        from .chinese_bert import get_bert_feature as zh_bert
+        bert_func = zh_bert
+    elif language == "EN":
+        from .english_bert import get_bert_feature as en_bert
+        bert_func = en_bert
+    elif language == "JP":
+        from .japanese_bert import get_bert_feature as jp_bert
+        bert_func = jp_bert
+    elif language == "ZH_MIX_EN":
+        from .chinese_mix import get_bert_feature as zh_mix_en_bert
+        bert_func = zh_mix_en_bert
+    elif language == "FR":
+        from .french_bert import get_bert_feature as fr_bert
+        bert_func = fr_bert
+    elif language in ["SP", "ES"]:
+        from .spanish_bert import get_bert_feature as sp_bert
+        bert_func = sp_bert
+    elif language == "KR":
+        from .korean import get_bert_feature as kr_bert
+        bert_func = kr_bert
+    else:
+        raise ValueError(f"Language {language} not supported")
 
-    lang_bert_func_map = {"ZH": zh_bert, "EN": en_bert, "JP": jp_bert, 'ZH_MIX_EN': zh_mix_en_bert, 
-                          'FR': fr_bert, 'SP': sp_bert, 'ES': sp_bert, "KR": kr_bert}
-    bert = lang_bert_func_map[language](norm_text, word2ph, device)
+    bert = bert_func(norm_text, word2ph, device)
     return bert
