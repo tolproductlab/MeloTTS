@@ -1,15 +1,7 @@
-try:
-    from . import french
-except ImportError:
-    french = None
-try:
-    from . import english
-except ImportError:
-    english = None
-try:
-    from . import spanish
-except ImportError:
-    spanish = None
+from . import french
+from . import english
+from . import spanish
+
 try:
     from . import chinese
 except ImportError:
